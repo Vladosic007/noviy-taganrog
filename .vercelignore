@@ -1,0 +1,18 @@
+# Vercel по конвенции считает /api Serverless Functions и пытается компилировать
+# каждый .ts в ней. У нас там отдельный NestJS-бэкенд (деплоится на Railway/Render),
+# Vercel'у на него смотреть не надо.
+api
+
+# Не тянем в билд то, что Vercel и сам игнорирует, но пусть будет явно.
+node_modules
+.env
+.env.local
+
+# Разработческие/референсные материалы
+Брендбук 2026.pdf
+фотки
+TZ_karta_problem_Taganrog_v1.md
+DEPLOY.md
+docker-compose.prod.yml
+deploy
+Dockerfile
