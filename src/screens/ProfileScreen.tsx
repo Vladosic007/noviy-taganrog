@@ -38,9 +38,14 @@ export function ProfileScreen() {
         </div>
       </div>
 
-      <button className="cta" style={{ width: '100%' }} disabled title="Появится с настройкой VK App">
-        Войти через ВКонтакте
-      </button>
+      <div className="soon-block">
+        <div className="soon-block__label">Скоро</div>
+        <div className="soon-block__title">Вход через ВКонтакте</div>
+        <div className="soon-block__text">
+          Пока сервис работает без входа. Скоро появится вход через ВК — чтобы
+          получать личные уведомления в личку и видеть свои заявки.
+        </div>
+      </div>
 
       {/* Тема (ТЗ 14.1) */}
       <section className="settings-section">
