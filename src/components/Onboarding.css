@@ -1,0 +1,79 @@
+.onb-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.45);
+  animation: fade-in 0.2s ease;
+}
+
+.onb-card {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 41;
+  padding: 20px 18px 18px;
+  background: var(--bg);
+  border-radius: 20px;
+  box-shadow: var(--shadow-sheet);
+  animation: sheet-up 0.26s ease;
+}
+
+.onb-title {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  margin-bottom: 14px;
+  color: var(--text);
+}
+
+.onb-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.onb-steps li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.onb-num {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--brand-primary);
+  color: var(--brand-ink);
+  font-weight: 700;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+  margin-top: 1px;
+}
+
+.onb-steps b {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.onb-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.onb-actions {
+  display: flex;
+}
+
+.onb-cta {
+  flex: 1;
+}

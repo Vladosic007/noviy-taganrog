@@ -6,6 +6,8 @@ import { CITY } from '../lib/config';
 import { problemsToGeoJSON, type Problem } from '../data/mockProblems';
 import { STATUS_META } from '../lib/statuses';
 import { FilterSheet } from '../components/FilterSheet';
+import { AppHeader } from '../components/AppHeader';
+import { Onboarding } from '../components/Onboarding';
 import { useFilters, applyFilters, activeFilterCount } from '../store/filters';
 import { useProblems } from '../lib/problems';
 import './MapScreen.css';
@@ -182,6 +184,8 @@ export function MapScreen() {
 
   return (
     <div className="map-screen">
+      <AppHeader />
+
       <div className="map-topbar">
         <div className="search-box">
           <span>🔎</span>
@@ -194,6 +198,8 @@ export function MapScreen() {
       </div>
 
       <div ref={containerRef} className="map-canvas" />
+
+      <Onboarding />
 
       <button className="locate-btn" onClick={locate} aria-label="Моё местоположение">
         📍
