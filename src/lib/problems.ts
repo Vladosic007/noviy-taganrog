@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { api, type ApiProblem } from './api';
 import type { Problem } from '../data/mockProblems';
+import { DEMO_PROBLEMS } from '../data/demoData';
+import { DEMO_MODE } from './config';
 
 /** Приводим ответ API к фронтовому типу Problem. */
 export function apiToProblem(a: ApiProblem): Problem {
@@ -29,17 +31,27 @@ export function apiToProblem(a: ApiProblem): Problem {
 
 /** Все опубликованные проблемы города (для карты и списка). */
 export function useProblems() {
-  return useQuery({
-    queryKey: ['problems'],
-    queryFn: async () => (await api.problems()).map(apiToProblem),
+  return useQuery<Problem[]>({
+    queryKey: ['problems', DEMO_MODE ? 'mock' : 'api'],
+    queryFn: async (): Promise<Problem[]> =>
+      DEMO_MODE ? DEMO_PROBLEMS : (await api.problems()).map(apiToProblem),
+    // В demo-режиме данные статические — не рефетчим и не считаем устаревшими.
+    staleTime: DEMO_MODE ? Infinity : 30_000,
   });
 }
 
 /** Одна проблема по id (для карточки). */
 export function useProblem(id: string | undefined) {
-  return useQuery({
-    queryKey: ['problem', id],
-    queryFn: async () => apiToProblem(await api.problem(id as string)),
+  return useQuery<Problem>({
+    queryKey: ['problem', id, DEMO_MODE ? 'mock' : 'api'],
+    queryFn: async (): Promise<Problem> => {
+      if (DEMO_MODE) {
+        const p = DEMO_PROBLEMS.find((x: Problem) => String(x.id) === String(id));
+        if (!p) throw new Error('not found');
+        return p;
+      }
+      return apiToProblem(await api.problem(id as string));
+    },
     enabled: !!id,
   });
 }

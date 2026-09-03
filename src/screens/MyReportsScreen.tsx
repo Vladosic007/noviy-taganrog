@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api, type ApiSubmission } from '../lib/api';
+import { DEMO_MODE } from '../lib/config';
 import { NotificationsFeed } from '../components/NotificationsFeed';
 import { CardListSkeleton } from '../components/Skeleton';
 import './screens.css';
@@ -27,11 +28,16 @@ const REJECT: Record<string, string> = {
 export function MyReportsScreen() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<'reports' | 'notifications'>('reports');
-  const { data: subs = [], isLoading } = useQuery({ queryKey: ['my-submissions'], queryFn: api.mySubmissions });
+  const { data: subs = [], isLoading } = useQuery({
+    queryKey: ['my-submissions'],
+    queryFn: api.mySubmissions,
+    enabled: !DEMO_MODE,
+  });
   const { data: countData } = useQuery({
     queryKey: ['notifications-count'],
     queryFn: api.notificationsCount,
     refetchInterval: 15_000,
+    enabled: !DEMO_MODE,
   });
   const unread = countData?.unread ?? 0;
 

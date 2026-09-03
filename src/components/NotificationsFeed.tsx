@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
+import { DEMO_MODE } from '../lib/config';
 import { Skeleton } from './Skeleton';
 import './NotificationsFeed.css';
 
@@ -28,6 +29,7 @@ export function NotificationsFeed() {
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['notifications-mine'],
     queryFn: api.notificationsMine,
+    enabled: !DEMO_MODE,
   });
 
   const readAll = useMutation({

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { CATEGORIES } from '../lib/categories';
-import { CITY, isInTaganrog } from '../lib/config';
+import { CITY, DEMO_MODE, isInTaganrog } from '../lib/config';
 import { api, type NearbyProblem } from '../lib/api';
 import { STATUS_META } from '../lib/statuses';
 import { compressImage } from '../lib/imageCompress';
@@ -118,8 +118,8 @@ export function ReportScreen() {
 
   async function trySubmit() {
     setError(null);
-    // «Другое» пропускаем — сравнивать не с чем; для остальных ищем дубли в радиусе 100 м.
-    if (category && category !== 'other') {
+    // В demo-режиме нет API /nearby — пропускаем проверку дублей.
+    if (!DEMO_MODE && category && category !== 'other') {
       try {
         const near = await api.nearby(coords.lat, coords.lng, { radius: 100, category });
         if (near.length > 0) {
@@ -137,6 +137,14 @@ export function ReportScreen() {
     setDuplicates(null);
     setSubmitting(true);
     setError(null);
+    // DEMO_MODE: сервер ещё не подключён — имитируем успех, чтобы можно было пройти
+    // сценарий целиком. Реальная отправка появится, когда подключим Railway/Render.
+    if (DEMO_MODE) {
+      await new Promise((r) => setTimeout(r, 600));
+      setSubmitted(true);
+      setSubmitting(false);
+      return;
+    }
     try {
       const fd = new FormData();
       photos.forEach((p) => fd.append('photos', p.file));
@@ -165,7 +173,11 @@ export function ReportScreen() {
         <div className="report-success">
           <span className="report-success__ico">✅</span>
           <h2>Заявка отправлена</h2>
-          <p className="muted">Обычно проверяем в течение суток. Мы сообщим, когда проблема появится на карте.</p>
+          <p className="muted">
+            {DEMO_MODE
+              ? 'Демо-режим: сервер ещё не подключён, заявка не сохранена. Так это будет выглядеть в бою — обычно проверяем в течение суток.'
+              : 'Обычно проверяем в течение суток. Мы сообщим, когда проблема появится на карте.'}
+          </p>
           <button className="cta" style={{ width: '100%' }} onClick={() => navigate('/my')}>
             Посмотреть мои заявки
           </button>

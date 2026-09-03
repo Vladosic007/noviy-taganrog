@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { STATUS_META, type ProblemStatus } from '../lib/statuses';
 import { useProblem } from '../lib/problems';
 import { api } from '../lib/api';
-import { API_HOST } from '../lib/config';
+import { API_HOST, DEMO_MODE } from '../lib/config';
 import './ProblemScreen.css';
 
 function fmtDate(iso?: string) {
@@ -27,9 +27,9 @@ export function ProblemScreen() {
   const [signOpen, setSignOpen] = useState(false);
 
   const { data: sigState } = useQuery({
-    queryKey: ['signature', id],
+    queryKey: ['signature', id, DEMO_MODE ? 'demo' : 'api'],
     queryFn: () => api.signatureState(id as string),
-    enabled: !!id,
+    enabled: !!id && !DEMO_MODE, // без API — просто «нет подписи», локально
   });
 
   const toggleSubscribe = useMutation({
@@ -96,6 +96,7 @@ export function ProblemScreen() {
     const wasLiked = liked;
     setLiked(!wasLiked);
     setLikeDelta((d) => d + (wasLiked ? -1 : 1));
+    if (DEMO_MODE) return; // локально только визуально
     api.toggleLike(problem!.id).catch(() => {
       setLiked(wasLiked);
       setLikeDelta((d) => d + (wasLiked ? 1 : -1));

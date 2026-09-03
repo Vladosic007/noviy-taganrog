@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
-import { API_HOST } from '../lib/config';
+import { API_HOST, DEMO_MODE } from '../lib/config';
 import './StreetsScreen.css';
 
 // Экран улиц + формирование PDF-обращения (раздел 6.3 ТЗ).
@@ -9,6 +9,7 @@ export function StreetsScreen() {
   const { data: streets = [], isLoading } = useQuery({
     queryKey: ['streets'],
     queryFn: api.streetsSummary,
+    enabled: !DEMO_MODE,
   });
   const [openStreet, setOpenStreet] = useState<{ key: string; name: string } | null>(null);
 

@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../lib/api';
+import { DEMO_MODE } from '../lib/config';
 import './BottomNav.css';
 
 // Раздел 5.1 ТЗ: Карта · Список · Мои заявки · Модерация (по роли) · Профиль.
@@ -22,11 +23,13 @@ export function BottomNav() {
     queryKey: ['moderation-count'],
     queryFn: api.moderationCount,
     refetchInterval: 15_000,
+    enabled: !DEMO_MODE,
   });
   const { data: notifData } = useQuery({
     queryKey: ['notifications-count'],
     queryFn: api.notificationsCount,
     refetchInterval: 15_000,
+    enabled: !DEMO_MODE,
   });
   const pending = modData?.pending ?? 0;
   const unread = notifData?.unread ?? 0;

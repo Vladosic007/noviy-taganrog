@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../lib/api';
+import { DEMO_MODE } from '../lib/config';
 import { STATUS_META, type ProblemStatus } from '../lib/statuses';
 import { Skeleton } from '../components/Skeleton';
 import './AnalyticsScreen.css';
@@ -9,6 +10,7 @@ export function AnalyticsScreen() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['analytics'],
     queryFn: api.analyticsOverview,
+    enabled: !DEMO_MODE,
   });
 
   if (isLoading) {

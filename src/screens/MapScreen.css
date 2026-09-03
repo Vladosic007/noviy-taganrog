@@ -64,6 +64,22 @@
   font-size: 18px;
 }
 
+/* Плашка «DEMO» — показываем только когда бэкенд не подключён (Vercel-деплой без API). */
+.demo-badge {
+  position: absolute;
+  top: 76px;
+  left: 12px;
+  z-index: 4;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--brand-accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  box-shadow: var(--shadow-float);
+}
+
 .filter-badge {
   position: absolute;
   top: -6px;

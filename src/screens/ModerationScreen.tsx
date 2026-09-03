@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type ApiSubmission } from '../lib/api';
-import { API_HOST } from '../lib/config';
+import { API_HOST, DEMO_MODE } from '../lib/config';
 import { CATEGORIES } from '../lib/categories';
 import { StreetsScreen } from './StreetsScreen';
 import { AnalyticsScreen } from './AnalyticsScreen';
@@ -24,7 +24,11 @@ export function ModerationScreen() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [tab, setTab] = useState<'queue' | 'streets' | 'analytics'>('queue');
-  const { data: queue = [], isLoading } = useQuery({ queryKey: ['moderation-queue'], queryFn: api.moderationQueue });
+  const { data: queue = [], isLoading } = useQuery({
+    queryKey: ['moderation-queue'],
+    queryFn: api.moderationQueue,
+    enabled: !DEMO_MODE,
+  });
   const current = queue[0];
 
   function invalidateAll() {
