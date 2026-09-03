@@ -1,0 +1,43 @@
+/* Фирменный шрифт New People (брендбук «Новые люди», стр. 6). Файлы в public/fonts/. */
+@font-face {
+  font-family: 'New People';
+  src: url('/fonts/NewPeople-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'New People';
+  src: url('/fonts/NewPeople-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'New People';
+  src: url('/fonts/NewPeople-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'New People';
+  src: url('/fonts/NewPeople-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'New People';
+  src: url('/fonts/NewPeople-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'New People';
+  src: url('/fonts/NewPeople-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}

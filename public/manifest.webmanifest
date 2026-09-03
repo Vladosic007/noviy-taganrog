@@ -1,0 +1,19 @@
+{
+  "name": "Новый Таганрог — карта городских проблем",
+  "short_name": "Новый Таганрог",
+  "description": "Совместная карта городских проблем Таганрога.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0ad1c9",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/logo-white.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

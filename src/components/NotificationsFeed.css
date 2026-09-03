@@ -1,0 +1,46 @@
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.feed-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  text-align: left;
+  cursor: pointer;
+}
+
+.feed-item.unread {
+  background: color-mix(in srgb, var(--brand-light) 60%, var(--bg));
+  border-color: var(--brand-primary);
+}
+
+.feed-ico {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.feed-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.feed-msg {
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.feed-meta {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+}

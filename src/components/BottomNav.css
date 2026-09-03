@@ -1,0 +1,56 @@
+.bottom-nav {
+  display: flex;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  flex-shrink: 0;
+}
+
+.bottom-nav a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  padding: 6px 2px;
+  border-radius: 10px;
+  transition: color 0.15s;
+}
+
+.bottom-nav a .nav-ico {
+  position: relative;
+  font-size: 20px;
+  line-height: 1;
+  filter: grayscale(1);
+  opacity: 0.7;
+}
+
+.nav-badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--brand-accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  filter: none;
+}
+
+.bottom-nav a.active {
+  color: var(--brand-primary-dark);
+  font-weight: 600;
+}
+
+.bottom-nav a.active .nav-ico {
+  filter: none;
+  opacity: 1;
+}

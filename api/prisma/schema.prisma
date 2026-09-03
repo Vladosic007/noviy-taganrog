@@ -1,0 +1,309 @@
+// Модель данных «Карты проблем Таганрога» — раздел 8 ТЗ.
+// Примечание: ТЗ предполагает PostgreSQL + PostGIS (geography(Point,4326)).
+// На локальном портативном Postgres PostGIS нет, поэтому координаты храним как
+// lat/lng (Float) + отдельная миграция добавит geography-колонку и GIST-индекс,
+// когда перейдём на боевой Postgres (Docker/VPS). Логика схемы от этого не меняется.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  user
+  moderator
+  superadmin
+}
+
+enum SubmissionStatus {
+  pending
+  published
+  merged
+  rejected
+}
+
+enum ProblemStatus {
+  found
+  in_progress
+  resolved
+  declined
+}
+
+enum PhotoKind {
+  before
+  after
+}
+
+enum RejectReason {
+  not_confirmed // не подтвердилось
+  duplicate // дубликат
+  out_of_scope // вне зоны ответственности
+  insufficient // недостаточно данных
+  rules // нарушает правила
+  not_taganrog // не в Таганроге
+}
+
+/// 8.1 Пользователи (из VK; пароли не храним)
+model User {
+  id           String    @id @default(uuid())
+  vkId         BigInt    @unique @map("vk_id")
+  firstName    String    @map("first_name")
+  lastName     String    @map("last_name")
+  photoUrl     String?   @map("photo_url")
+  role         Role      @default(user)
+  notifyEnabled Boolean  @default(false) @map("notify_enabled")
+  isBanned     Boolean   @default(false) @map("is_banned")
+  banReason    String?   @map("ban_reason")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  lastSeenAt   DateTime? @map("last_seen_at")
+
+  submissions   Submission[]
+  createdProblems Problem[]  @relation("ProblemCreatedBy")
+  likes         Like[]
+  signatures    Signature[]
+  subscriptions Subscription[]
+
+  @@map("users")
+}
+
+/// 8.2 Заявки (приватны: автор + модераторы)
+model Submission {
+  id             String           @id @default(uuid())
+  authorId       String           @map("author_id")
+  author         User             @relation(fields: [authorId], references: [id])
+  categoryId     String?          @map("category_id")
+  category       Category?        @relation(fields: [categoryId], references: [id])
+  customCategory String?          @map("custom_category")
+  description    String
+  lat            Float
+  lng            Float
+  addressText    String?          @map("address_text")
+  streetId       String?          @map("street_id")
+  street         Street?          @relation(fields: [streetId], references: [id])
+  house          String?
+  occurredOn     DateTime         @map("occurred_on") @db.Date
+  createdAt      DateTime         @default(now()) @map("created_at")
+  isAnonymous    Boolean          @default(false) @map("is_anonymous")
+  status         SubmissionStatus @default(pending)
+  rejectReason   RejectReason?    @map("reject_reason")
+  rejectComment  String?          @map("reject_comment")
+  problemId      String?          @map("problem_id")
+  problem        Problem?         @relation("SubmissionProblem", fields: [problemId], references: [id])
+  moderatedById  String?          @map("moderated_by")
+  moderatedAt    DateTime?        @map("moderated_at")
+  consentVersion String?          @map("consent_version")
+
+  photos Photo[]
+
+  @@index([status, createdAt])
+  @@map("submissions")
+}
+
+/// 8.3 Публичные проблемы
+model Problem {
+  id             String        @id @default(uuid())
+  publicId       Int           @unique @default(autoincrement()) @map("public_id")
+  title          String
+  description    String
+  categoryId     String        @map("category_id")
+  category       Category      @relation(fields: [categoryId], references: [id])
+  lat            Float
+  lng            Float
+  addressText    String?       @map("address_text")
+  streetId       String?       @map("street_id")
+  street         Street?       @relation(fields: [streetId], references: [id])
+  house          String?
+  status         ProblemStatus @default(found)
+  signatureGoal  Int           @default(100) @map("signature_goal")
+  occurredOn     DateTime?     @map("occurred_on") @db.Date
+  publishedAt    DateTime?     @map("published_at")
+  statusChangedAt DateTime?    @map("status_changed_at")
+  resolvedAt     DateTime?     @map("resolved_at")
+  createdById    String?       @map("created_by")
+  createdBy      User?         @relation("ProblemCreatedBy", fields: [createdById], references: [id])
+  isPublished    Boolean       @default(true) @map("is_published")
+  // Денормализованные счётчики (раздел 8.3 ТЗ) — обновляются в сервисе/триггером
+  likesCount      Int          @default(0) @map("likes_count")
+  signaturesCount Int          @default(0) @map("signatures_count")
+
+  submissions   Submission[]  @relation("SubmissionProblem")
+  photos        Photo[]
+  likes         Like[]
+  signatures    Signature[]
+  subscriptions Subscription[]
+  statusHistory ProblemStatusHistory[]
+
+  @@index([status, isPublished])
+  @@index([streetId])
+  @@map("problems")
+}
+
+/// 8.4 Фотографии
+model Photo {
+  id           String     @id @default(uuid())
+  submissionId String?    @map("submission_id")
+  submission   Submission? @relation(fields: [submissionId], references: [id])
+  problemId    String?    @map("problem_id")
+  problem      Problem?   @relation(fields: [problemId], references: [id])
+  kind         PhotoKind  @default(before)
+  path         String
+  width        Int?
+  height       Int?
+  bytes        Int?
+  sort         Int        @default(0)
+  uploadedById String?    @map("uploaded_by")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@map("photos")
+}
+
+/// 8.5 Лайки («Подтверждаю»): составной ключ (user, problem)
+model Like {
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  problemId String   @map("problem_id")
+  problem   Problem  @relation(fields: [problemId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@id([userId, problemId])
+  @@map("likes")
+}
+
+/// 8.6 Подписи под обращением (юридически значимые)
+model Signature {
+  id                String    @id @default(uuid())
+  problemId         String    @map("problem_id")
+  problem           Problem   @relation(fields: [problemId], references: [id])
+  userId            String    @map("user_id")
+  user              User      @relation(fields: [userId], references: [id])
+  fullName          String    @map("full_name")
+  consentTextVersion String   @map("consent_text_version")
+  consentedAt       DateTime  @default(now()) @map("consented_at")
+  ip                String?
+  userAgent         String?   @map("user_agent")
+  revokedAt         DateTime? @map("revoked_at")
+  exportedAt        DateTime? @map("exported_at")
+
+  @@unique([problemId, userId])
+  @@map("signatures")
+}
+
+/// 8.7 Слежение
+model Subscription {
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  problemId String   @map("problem_id")
+  problem   Problem  @relation(fields: [problemId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@id([userId, problemId])
+  @@map("subscriptions")
+}
+
+/// 8.8 Категории
+model Category {
+  id       String  @id @default(uuid())
+  slug     String  @unique
+  title    String
+  icon     String?
+  color    String?
+  sort     Int     @default(0)
+  isActive Boolean @default(true) @map("is_active")
+
+  submissions Submission[]
+  problems    Problem[]
+
+  @@map("categories")
+}
+
+/// 8.9 Улицы и адреса (из OSM)
+model Street {
+  id             String  @id @default(uuid())
+  osmId          BigInt? @map("osm_id")
+  name           String
+  nameNormalized String  @map("name_normalized")
+  problemsCount  Int     @default(0) @map("problems_count")
+
+  addresses   Address[]
+  submissions Submission[]
+  problems    Problem[]
+
+  @@index([nameNormalized])
+  @@map("streets")
+}
+
+model Address {
+  id       String  @id @default(uuid())
+  streetId String  @map("street_id")
+  street   Street  @relation(fields: [streetId], references: [id])
+  house    String
+  lat      Float
+  lng      Float
+
+  @@map("addresses")
+}
+
+/// 8.10 История статусов проблемы
+model ProblemStatusHistory {
+  id         String        @id @default(uuid())
+  problemId  String        @map("problem_id")
+  problem    Problem       @relation(fields: [problemId], references: [id])
+  fromStatus ProblemStatus? @map("from_status")
+  toStatus   ProblemStatus  @map("to_status")
+  comment    String?
+  changedById String?      @map("changed_by")
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  @@map("problem_status_history")
+}
+
+/// 8.11 Сформированные обращения
+model Appeal {
+  id              String   @id @default(uuid())
+  streetId        String?  @map("street_id")
+  createdById     String?  @map("created_by")
+  createdAt       DateTime @default(now()) @map("created_at")
+  problemIds      String[] @map("problem_ids")
+  signaturesCount Int      @default(0) @map("signatures_count")
+  filePath        String?  @map("file_path")
+
+  @@map("appeals")
+}
+
+/// 8.12 Журнал действий
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?  @map("actor_id")
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  payload    Json?
+  ip         String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("audit_log")
+}
+
+/// 8.13 Лог уведомлений
+model NotificationLog {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  problemId String?  @map("problem_id")
+  type      String
+  payload   Json?
+  // sent — реально доставлено (через VK Bridge, фаза 5+); skipped — не отправлено,
+  // потому что у получателя не подключён ВК; failed — попытка провалилась.
+  status    String
+  error     String?
+  // Флаг прочтения в фиде «Мои уведомления». Для доставленных в ВК это не важно
+  // (ВК сам управляет прочтением), но во внутренней ленте нужен.
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId, read, createdAt])
+  @@map("notifications_log")
+}

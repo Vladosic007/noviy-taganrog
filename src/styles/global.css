@@ -1,0 +1,51 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-text);
+  color: var(--text);
+  background: var(--surface);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+input,
+button,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+/* Каркас приложения: колонка максимум 480px по центру (раздел 2.2 ТЗ) */
+.app-layout {
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--bg);
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
+}
+
+.app-main {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}

@@ -1,0 +1,127 @@
+.analytics {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.kpi {
+  padding: 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+
+.kpi.accent {
+  background: var(--brand-light);
+  border-color: var(--brand-primary);
+}
+
+.kpi-value {
+  font-size: 26px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--brand-primary-dark);
+  line-height: 1.1;
+}
+
+.kpi.accent .kpi-value {
+  color: var(--brand-ink);
+}
+
+.kpi-label {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.an-section h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+/* Воронка */
+.funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.funnel-row .funnel-head,
+.top-row .top-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.funnel-bar,
+.top-bar {
+  height: 6px;
+  background: var(--surface);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.funnel-bar span,
+.top-bar span {
+  display: block;
+  height: 100%;
+  background: var(--brand-primary);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+/* Столбец по статусам — один сегментированный бар */
+.status-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.status-seg {
+  height: 100%;
+}
+
+.status-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.status-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Топ-баров */
+.top-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.small {
+  font-size: 11px;
+}

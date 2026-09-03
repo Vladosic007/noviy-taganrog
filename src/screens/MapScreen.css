@@ -1,0 +1,192 @@
+.map-screen {
+  position: absolute;
+  inset: 0;
+}
+
+.map-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* В тёмной теме подложка OSM остаётся светлой. Пока не подключены свои PMTiles
+   (ТЗ 14.1, следующая фаза), применяем универсальный CSS-фильтр «invert + hue»,
+   который делает карту читаемой на тёмном фоне. Маркеры внутри того же canvas —
+   их придётся инвертировать обратно (invert(1) вернёт исходный цвет). */
+:root[data-theme='dark'] .map-canvas {
+  filter: invert(0.9) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .map-canvas {
+    filter: invert(0.9) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+  }
+}
+
+.map-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+}
+
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-button);
+  padding: 10px 12px;
+  box-shadow: var(--shadow-float);
+}
+
+.search-box input {
+  border: 0;
+  outline: 0;
+  flex: 1;
+  font-size: 14px;
+  background: transparent;
+  color: var(--text);
+}
+
+.filter-btn {
+  position: relative;
+  width: 44px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-button);
+  box-shadow: var(--shadow-float);
+  font-size: 18px;
+}
+
+.filter-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--brand-accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+.locate-btn {
+  position: absolute;
+  right: 12px;
+  bottom: 84px;
+  z-index: 5;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-float);
+  font-size: 18px;
+}
+
+.report-btn {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 16px;
+  z-index: 5;
+  height: 54px;
+  border: 0;
+  border-radius: var(--radius-button);
+  background: var(--brand-accent);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(239, 64, 86, 0.38);
+}
+
+.preview-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
+  background: var(--bg);
+  border-radius: 20px 20px 0 0;
+  box-shadow: var(--shadow-sheet);
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  animation: sheet-up 0.25s ease;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.preview-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.preview-close {
+  border: 0;
+  background: transparent;
+  font-size: 18px;
+  color: var(--text-muted);
+}
+
+.preview-title {
+  margin: 4px 0;
+  font-size: 17px;
+}
+
+.preview-meta {
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.preview-sign {
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.preview-open {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #fff;
+}
+
+.progress {
+  height: 8px;
+  background: var(--surface);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress > span {
+  display: block;
+  height: 100%;
+  background: var(--brand-primary);
+  border-radius: 999px;
+}

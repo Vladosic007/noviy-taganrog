@@ -1,0 +1,73 @@
+# Прод-стек «Нового Таганрога» (раздел 15 ТЗ).
+# На боевой машине (VPS у РФ-провайдера) достаточно:
+#   1) cp .env.example .env  → заполнить секреты (VK_APP_SECRET, POSTGRES_PASSWORD)
+#   2) docker compose -f docker-compose.prod.yml up -d --build
+#
+# Сервисы:
+#   db       — PostgreSQL 17 с PostGIS (для настоящих geo-запросов; заменит формулу Хаверсина)
+#   api      — NestJS, слушает 3001 внутри сети docker
+#   web      — статичный билд Vite, кладётся в nginx-контейнер
+#   nginx    — reverse-proxy: 80 → web (/), /api/ → api, /uploads/ → api
+#
+# Волюмы: pgdata (БД), uploads (фото заявок), appeals (PDF-обращения) — переживают перезапуск.
+
+services:
+  db:
+    image: postgis/postgis:17-3.5-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: taganrog
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: taganrog
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'taganrog']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: '3001'
+      DATABASE_URL: postgresql://taganrog:${POSTGRES_PASSWORD}@db:5432/taganrog?schema=public
+      VK_APP_ID: ${VK_APP_ID:-}
+      VK_APP_SECRET: ${VK_APP_SECRET:-}
+      VK_SUPERADMIN_ID: ${VK_SUPERADMIN_ID:-}
+    volumes:
+      - uploads:/app/uploads
+      - appeals:/app/appeals
+      # Шрифт для PDF-обращений. Файлы лежат в repo и в prod-образе не нужны — монтируем.
+      - ./public/fonts:/public/fonts:ro
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_HOST: ${PUBLIC_ORIGIN:-}
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - api
+      - web
+    ports:
+      - '80:80'
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  pgdata:
+  uploads:
+  appeals:

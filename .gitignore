@@ -1,0 +1,37 @@
+# === Node / IDE ===
+node_modules
+.pnp
+.pnp.js
+.DS_Store
+*.log
+.vscode
+.idea
+
+# === Vite build ===
+dist
+dist-ssr
+*.local
+.vite
+
+# === Env ===
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# === Загруженные пользователями материалы (не в git!) ===
+api/uploads
+api/appeals
+api/pgdata
+
+# === Prisma runtime ===
+api/node_modules
+api/dist
+api/.env
+
+# === Скачанные пользователем ассеты (шрифты уже в public/fonts, оригинал не нужен) ===
+фотки
+Брендбук 2026.pdf
+
+# === Локальные Claude Code файлы ===
+.claude/settings.local.json

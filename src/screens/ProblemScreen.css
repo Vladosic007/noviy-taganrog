@@ -1,0 +1,390 @@
+.problem {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.problem-head {
+  justify-content: space-between;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: var(--surface);
+  border-radius: 10px;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.problem-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px calc(24px + env(safe-area-inset-bottom));
+}
+
+/* Галерея */
+.gallery-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0 8px;
+  background: var(--surface);
+  padding: 4px;
+  border-radius: var(--radius-button);
+}
+
+.gallery-tabs button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 8px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.gallery-tabs button.on {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--shadow-float);
+}
+
+.photo-hero {
+  height: 200px;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+
+.photo-hero span {
+  font-size: 44px;
+}
+
+.photo-hero em {
+  font-style: normal;
+  font-size: 13px;
+}
+
+.photo-hero.is-after {
+  background: color-mix(in srgb, var(--status-resolved) 14%, var(--bg));
+  color: var(--status-resolved);
+}
+
+.photo-hero.is-before {
+  background: var(--surface);
+}
+
+.problem-title {
+  font-size: 20px;
+  font-family: var(--font-display);
+  margin: 16px 0 12px;
+  line-height: 1.25;
+}
+
+.chips-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.cat-pill {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--brand-light);
+  color: var(--brand-ink);
+  font-weight: 600;
+}
+
+.addr-line {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 12px 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.dates {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.dates div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dates span {
+  font-size: 12px;
+}
+
+.dates b {
+  font-size: 14px;
+}
+
+.problem-desc {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* Поддержка */
+.support {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  margin: 8px 0 20px;
+}
+
+.like-btn {
+  width: 100%;
+  height: 46px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: var(--radius-button);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.like-btn.on {
+  background: var(--brand-light);
+  border-color: var(--brand-primary);
+  color: var(--brand-ink);
+}
+
+.sign-txt {
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.support-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.sign-btn {
+  flex: 1;
+}
+
+.watch-btn {
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: var(--radius-button);
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.watch-btn.on {
+  background: var(--brand-light);
+  border-color: var(--brand-primary);
+}
+
+/* Автор */
+.author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+
+.author-ava {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--brand-light);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+
+/* История */
+.history {
+  border-top: 1px solid var(--border);
+  padding: 14px 0;
+}
+
+.history summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  list-style: none;
+}
+
+.history summary::after {
+  content: ' ▾';
+  color: var(--text-muted);
+}
+
+.history ul {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.photo-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 12px -4px 0;
+  padding: 4px;
+}
+
+.photo-strip img {
+  height: 200px;
+  min-width: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+/* Панель модератора */
+.mod-panel {
+  margin: 20px 0 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.mod-open {
+  width: 100%;
+  padding: 12px;
+  border: 1px dashed var(--border);
+  background: var(--surface);
+  border-radius: var(--radius-button);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.mod-panel-body {
+  padding: 16px;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.mod-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.mod-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.status-radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-button);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.status-radio.on {
+  background: var(--brand-light);
+  border-color: var(--brand-primary);
+  font-weight: 600;
+}
+
+.status-radio input {
+  accent-color: var(--brand-primary);
+}
+
+.after-block {
+  margin-top: 12px;
+}
+
+.mod-upload-btn {
+  width: 100%;
+  height: 46px;
+  border: 1px dashed var(--brand-primary);
+  background: var(--bg);
+  border-radius: var(--radius-button);
+  color: var(--brand-primary-dark);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.mod-upload-btn:disabled {
+  opacity: 0.5;
+}
+
+/* Блок «Вы подписали» вместо кнопки «Подписать» */
+.signed-block {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: var(--radius-button);
+  background: var(--brand-light);
+  color: var(--brand-ink);
+  min-height: 48px;
+}
+
+.signed-txt {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.revoke-btn {
+  border: 0;
+  background: transparent;
+  color: var(--brand-accent);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* Шторка подписи */
+.sign-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 21;
+  max-height: 88%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-radius: 20px 20px 0 0;
+  box-shadow: var(--shadow-sheet);
+  animation: sheet-up 0.26s ease;
+}
+
+.sign-sheet .sheet-scroll {
+  padding: 8px 16px 16px;
+  overflow-y: auto;
+}

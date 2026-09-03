@@ -1,0 +1,151 @@
+.streets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.street-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  text-align: left;
+}
+
+.street-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.street-stats {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.street-sigs {
+  font-weight: 600;
+  color: var(--brand-primary-dark);
+}
+
+/* Шторка формирования обращения */
+.appeal-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 21;
+  max-height: 88%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-radius: 20px 20px 0 0;
+  box-shadow: var(--shadow-sheet);
+  animation: sheet-up 0.26s ease;
+}
+
+.appeal-sheet .sheet-scroll {
+  padding: 8px 16px 16px;
+  overflow-y: auto;
+}
+
+.appeal-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.appeal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.appeal-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-button);
+  cursor: pointer;
+}
+
+.appeal-row.on {
+  background: var(--brand-light);
+  border-color: var(--brand-primary);
+}
+
+.appeal-row input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--brand-primary);
+  flex-shrink: 0;
+}
+
+.appeal-row-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.appeal-row-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.appeal-result {
+  text-align: center;
+  padding: 24px 16px;
+}
+
+.appeal-result__ico {
+  font-size: 44px;
+  margin-bottom: 8px;
+}
+
+.appeal-result h4 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.appeal-result .cta {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 12px 24px;
+  text-decoration: none;
+}
+
+/* Переключатель «Очередь / Улицы» */
+.mod-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface);
+  border-radius: var(--radius-button);
+  margin: 0 16px 12px;
+}
+
+.mod-tabs button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 10px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.mod-tabs button.on {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--shadow-float);
+}
