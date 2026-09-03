@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { CITY, DEMO_MODE } from '../lib/config';
+import { CITY } from '../lib/config';
 import { problemsToGeoJSON, type Problem } from '../data/mockProblems';
 import { STATUS_META } from '../lib/statuses';
 import { FilterSheet } from '../components/FilterSheet';
@@ -194,12 +194,6 @@ export function MapScreen() {
       </div>
 
       <div ref={containerRef} className="map-canvas" />
-
-      {DEMO_MODE && (
-        <div className="demo-badge" title="Сервер не подключён — данные для показа">
-          DEMO
-        </div>
-      )}
 
       <button className="locate-btn" onClick={locate} aria-label="Моё местоположение">
         📍
