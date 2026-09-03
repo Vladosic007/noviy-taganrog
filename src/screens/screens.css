@@ -227,37 +227,30 @@
   box-shadow: var(--shadow-float);
 }
 
-/* Плашка «Скоро» — вместо не-работающего CTA. Не выглядит как основной action. */
-.soon-block {
-  padding: 14px 16px;
-  border: 1px dashed var(--border);
+/* Статус модератора: активная плашка после ввода ключа */
+.mod-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
   border-radius: var(--radius-button);
-  background: var(--surface);
-  margin-top: 4px;
-}
-
-.soon-block__label {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--brand-primary);
+  background: var(--brand-light);
   color: var(--brand-ink);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  margin-bottom: 8px;
 }
 
-.soon-block__title {
+.mod-status__title {
   font-weight: 600;
-  font-size: 15px;
-  margin-bottom: 4px;
+  font-size: 14px;
 }
 
-.soon-block__text {
+.mod-status__off {
+  border: 0;
+  background: transparent;
+  color: var(--brand-accent);
+  font-weight: 600;
   font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.4;
+  cursor: pointer;
 }
 
 .brand-footer {

@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type ApiSubmission } from '../lib/api';
 import { API_HOST, DEMO_MODE } from '../lib/config';
 import { CATEGORIES } from '../lib/categories';
+import { useIsModerator } from '../lib/moderatorAccess';
 import { StreetsScreen } from './StreetsScreen';
 import { AnalyticsScreen } from './AnalyticsScreen';
 import { Skeleton } from '../components/Skeleton';
@@ -23,13 +24,41 @@ const REJECT_REASONS = [
 export function ModerationScreen() {
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const isMod = useIsModerator();
   const [tab, setTab] = useState<'queue' | 'streets' | 'analytics'>('queue');
   const { data: queue = [], isLoading } = useQuery({
     queryKey: ['moderation-queue'],
     queryFn: api.moderationQueue,
-    enabled: !DEMO_MODE,
+    enabled: !DEMO_MODE && isMod,
   });
   const current = queue[0];
+
+  // Не-модератор попал по прямой ссылке /moderation — показываем заглушку с приглашением
+  // ввести ключ. Ключ вводится в Профиле.
+  if (!isMod) {
+    return (
+      <div className="mod">
+        <header className="mod-head">
+          <button className="report-back" onClick={() => navigate('/')} aria-label="Назад">
+            ‹
+          </button>
+          <div>
+            <h1>Модерация</h1>
+          </div>
+        </header>
+        <div className="mod-body">
+          <div className="empty">
+            <span className="big">🛡️</span>
+            <h2>Только для модераторов</h2>
+            <p>Введите ключ модератора в Профиле — вкладка появится сама.</p>
+            <button className="cta" onClick={() => navigate('/profile')}>
+              Перейти в Профиль
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   function invalidateAll() {
     qc.invalidateQueries({ queryKey: ['moderation-queue'] });
