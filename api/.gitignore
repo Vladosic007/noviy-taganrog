@@ -4,5 +4,6 @@ pgdata
 .env
 *.log
 
-uploads
-appeals
+# ⚠️ ведущий слеш обязателен — иначе игнорится и src/appeals/ (наш код!)
+/uploads
+/appeals
