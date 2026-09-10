@@ -8,6 +8,7 @@ import { STATUS_META } from '../lib/statuses';
 import { FilterSheet } from '../components/FilterSheet';
 import { AppHeader } from '../components/AppHeader';
 import { Onboarding } from '../components/Onboarding';
+import { AddressSearch } from '../components/AddressSearch';
 import { useFilters, applyFilters, activeFilterCount } from '../store/filters';
 import { useProblems } from '../lib/problems';
 import './MapScreen.css';
@@ -34,6 +35,7 @@ export function MapScreen() {
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [selected, setSelected] = useState<Problem | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const filters = useFilters();
 
   // Данные из API. Держим в ref, чтобы обработчики карты (созданные один раз) видели
@@ -187,9 +189,18 @@ export function MapScreen() {
       <AppHeader />
 
       <div className="map-topbar">
-        <div className="search-box">
+        <div className="search-box search-box--wrap">
           <span>🔎</span>
-          <input placeholder="Поиск по адресу или улице" />
+          <AddressSearch
+            value={searchQuery}
+            placeholder="Поиск по адресу или улице"
+            onChange={setSearchQuery}
+            onPick={(r) => {
+              setSearchQuery(r.short);
+              mapRef.current?.flyTo({ center: [r.lng, r.lat], zoom: 16, duration: 900 });
+            }}
+            className="search-box__field"
+          />
         </div>
         <button className="filter-btn" aria-label="Фильтры" onClick={() => setShowFilters(true)}>
           ⚙️

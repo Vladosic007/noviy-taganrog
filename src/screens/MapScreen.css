@@ -42,8 +42,22 @@
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-button);
-  padding: 10px 12px;
+  padding: 4px 12px;
   box-shadow: var(--shadow-float);
+  position: relative;
+}
+
+.search-box .addr-search {
+  flex: 1;
+  margin-top: 0;
+}
+
+.search-box .addr-search .text-input {
+  border: 0;
+  padding: 8px 0;
+  background: transparent;
+  outline: 0;
+  width: 100%;
 }
 
 .search-box input {

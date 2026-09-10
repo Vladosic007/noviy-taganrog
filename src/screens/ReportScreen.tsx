@@ -7,6 +7,7 @@ import { api, type NearbyProblem } from '../lib/api';
 import { STATUS_META } from '../lib/statuses';
 import { compressImage } from '../lib/imageCompress';
 import { readExifGps } from '../lib/exif';
+import { AddressSearch } from '../components/AddressSearch';
 import './ReportScreen.css';
 
 const MAX_PHOTOS = 3;
@@ -312,11 +313,14 @@ export function ReportScreen() {
             </button>
           </div>
           {locMethod === 'search' ? (
-            <input
-              className="text-input"
-              placeholder="Улица и дом, например «Петровская, 45»"
+            <AddressSearch
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Улица и дом, например «Петровская, 45»"
+              onChange={setAddress}
+              onPick={(r) => {
+                setAddress(r.short);
+                setCoords({ lat: r.lat, lng: r.lng, set: true });
+              }}
             />
           ) : (
             address && <div className="addr-box">{address}</div>
