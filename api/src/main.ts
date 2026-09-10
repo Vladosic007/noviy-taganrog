@@ -21,8 +21,9 @@ async function bootstrap() {
   app.useStaticAssets(join(process.cwd(), 'appeals'), { prefix: '/appeals/' });
 
   const port = process.env.PORT ? Number(process.env.PORT) : 3001;
-  await app.listen(port);
-  console.log(`API готов: http://localhost:${port}/api/v1`);
+  // 0.0.0.0 обязательно для Render/Fly/Docker — иначе доступно только внутри контейнера.
+  await app.listen(port, '0.0.0.0');
+  console.log(`API готов на порту ${port}`);
 }
 
 bootstrap();
