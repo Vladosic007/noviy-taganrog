@@ -9,13 +9,13 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 # libc6-compat нужен, чтобы sharp и prisma нашли системные библиотеки на alpine.
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
 COPY package.json package-lock.json* ./
 RUN npm ci
 
 FROM node:22-alpine AS build
 WORKDIR /app
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json ./
 COPY tsconfig.json nest-cli.json ./
@@ -27,7 +27,7 @@ RUN npm run build
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
