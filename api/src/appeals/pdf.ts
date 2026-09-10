@@ -14,7 +14,7 @@ interface ProblemLine {
   occurredOn: Date | null;
   description: string;
   signaturesCount: number;
-  photoPaths: string[]; // относительные пути (/uploads/<uuid>.ext)
+  photoBuffers: Buffer[]; // фото приходят буферами из Photo.data (bytea)
 }
 
 export interface AppealInput {
@@ -145,26 +145,24 @@ async function drawProblem(ctx: RenderCtx, p: ProblemLine) {
   drawWrapped(ctx, p.description, { font: ctx.fontRegular, size: 11, color: ink, lineHeight: 14 });
 
   // Фотографии-доказательства (раздел 6.3 ТЗ, критерий приёмки 18).
-  if (p.photoPaths.length > 0) {
+  if (p.photoBuffers.length > 0) {
     moveDown(ctx, 8);
-    await drawPhotos(ctx, p.photoPaths);
+    await drawPhotos(ctx, p.photoBuffers);
   }
 }
 
 // Кладём до 2 фото в ряд, каждое ~ (CONTENT_W - gap) / 2 в ширину, высота — от пропорций.
 // WebP не поддерживается pdf-lib, поэтому все нестандартные форматы прогоняем через sharp
 // в JPEG. Битые файлы просто пропускаем, чтобы обращение всё равно сформировалось.
-async function drawPhotos(ctx: RenderCtx, paths: string[]) {
+async function drawPhotos(ctx: RenderCtx, buffers: Buffer[]) {
   const gap = 10;
   const maxCols = 2;
   const cellW = (CONTENT_W - gap * (maxCols - 1)) / maxCols;
   const maxCellH = 180;
 
   const images: { img: PDFImage; w: number; h: number }[] = [];
-  for (const rel of paths.slice(0, maxCols)) {
+  for (const buf of buffers.slice(0, maxCols)) {
     try {
-      const abs = join(process.cwd(), rel.replace(/^\//, ''));
-      const buf = await fs.readFile(abs);
       const jpeg = await sharp(buf).rotate().jpeg({ quality: 82 }).toBuffer();
       const img = await ctx.doc.embedJpg(jpeg);
       images.push({ img, w: img.width, h: img.height });

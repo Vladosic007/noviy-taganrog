@@ -203,8 +203,8 @@ export function ReportScreen() {
   return (
     <div className="report">
       <header className="report-head">
-        <button className="report-back" onClick={() => navigate(-1)} aria-label="Назад">
-          ‹
+        <button className="report-back" onClick={() => navigate(-1)} aria-label="Отменить и вернуться">
+          ← Отмена
         </button>
         <h1>Сообщить о проблеме</h1>
       </header>
@@ -226,7 +226,7 @@ export function ReportScreen() {
             ))}
             {photos.length < MAX_PHOTOS && (
               <label className="photo-add">
-                <input type="file" accept="image/*" capture="environment" multiple hidden onChange={(e) => addPhotos(e.target.files)} />
+                <input type="file" accept="image/*" multiple hidden onChange={(e) => addPhotos(e.target.files)} />
                 {compressing > 0 ? (
                   <>
                     <span>⏳</span>

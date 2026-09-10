@@ -107,9 +107,12 @@ export class AppealsService {
         occurredOn: p.occurredOn,
         description: p.description,
         signaturesCount: p.signaturesCount,
-        // До 2 фото «before» на проблему — в приложение попадёт визуальный аргумент.
-        // path хранит /uploads/<uuid>.<ext>; отдаём как есть, PDF-рендер сам прочитает файл.
-        photoPaths: p.photos.filter((x) => x.kind === 'before').slice(0, 2).map((x) => x.path),
+        // До 2 фото «before» на проблему — передаём буфер прямо из БД (bytea),
+        // потому что диск на Render Free tier эфемерный.
+        photoBuffers: p.photos
+          .filter((x) => x.kind === 'before' && x.data)
+          .slice(0, 2)
+          .map((x) => Buffer.from(x.data as Uint8Array)),
       })),
       signatures: allSignatures,
     });

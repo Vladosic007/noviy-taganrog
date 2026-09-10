@@ -1,10 +1,15 @@
 import { Body, Controller, Get, Param, Post, Query, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import { randomUUID } from 'crypto';
+import { memoryStorage } from 'multer';
 import { ProblemStatus, RejectReason } from '@prisma/client';
 import { ModerationService } from './moderation.service';
+
+type UploadedFile = {
+  buffer: Buffer;
+  originalname: string;
+  mimetype: string;
+  size: number;
+};
 
 // ⚠️ Все ручки модерации ДОЛЖНЫ быть защищены гардом роли (moderator/superadmin) — раздел 3.1 ТЗ.
 // До VK-авторизации (фаза 5) гарда нет: любой запрос обрабатывается. Это временно и
@@ -44,17 +49,14 @@ export class ModerationController {
   @Post('problems/:id/photos')
   @UseInterceptors(
     FilesInterceptor('photos', 5, {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (_req, file, cb) => cb(null, `${randomUUID()}${extname(file.originalname) || '.jpg'}`),
-      }),
+      storage: memoryStorage(),
       limits: { fileSize: 5 * 1024 * 1024 },
     }),
   )
   addPhotos(
     @Param('id') id: string,
     @Query('kind') kind: 'before' | 'after' = 'after',
-    @UploadedFiles() files: Array<{ filename: string; size: number }>,
+    @UploadedFiles() files: UploadedFile[],
   ) {
     return this.moderation.addPhotos(id, kind, files);
   }

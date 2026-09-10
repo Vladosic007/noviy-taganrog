@@ -153,6 +153,12 @@ model Photo {
   problemId    String?    @map("problem_id")
   problem      Problem?   @relation(fields: [problemId], references: [id])
   kind         PhotoKind  @default(before)
+  // Хранение фото прямо в БД, чтобы не терялись при рестарте эфемерного контейнера
+  // (Render Free tier). Отдаются через GET /photos/:id/file.
+  data         Bytes?
+  mimeType     String?    @map("mime_type")
+  // Публичный URL для отдачи — API формирует его сам как /api/v1/photos/:id/file
+  // Старые фото (до этой миграции) хранятся в поле path.
   path         String
   width        Int?
   height       Int?

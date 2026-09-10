@@ -1,26 +1,30 @@
 import { Body, Controller, Get, Post, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import { randomUUID } from 'crypto';
+import { memoryStorage } from 'multer';
 import { SubmissionsService } from './submissions.service';
+
+// Файл в multer при memoryStorage.
+type UploadedFile = {
+  buffer: Buffer;
+  originalname: string;
+  mimetype: string;
+  size: number;
+};
 
 @Controller('submissions')
 export class SubmissionsController {
   constructor(private readonly submissions: SubmissionsService) {}
 
   // POST /submissions — создать заявку (multipart: поля + до 3 фото). Раздел 9.3 ТЗ.
+  // Фото храним прямо в Postgres как BYTEA (Render Free tier эфемерный).
   @Post()
   @UseInterceptors(
     FilesInterceptor('photos', 3, {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (_req, file, cb) => cb(null, `${randomUUID()}${extname(file.originalname) || '.jpg'}`),
-      }),
+      storage: memoryStorage(),
       limits: { fileSize: 5 * 1024 * 1024 },
     }),
   )
-  create(@UploadedFiles() files: Array<{ filename: string; size: number }>, @Body() body: Record<string, string>) {
+  create(@UploadedFiles() files: UploadedFile[], @Body() body: Record<string, string>) {
     return this.submissions.create(
       {
         categorySlug: body.categorySlug || undefined,

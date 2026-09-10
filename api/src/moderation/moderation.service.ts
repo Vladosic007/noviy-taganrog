@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ProblemStatus, RejectReason } from '@prisma/client';
+import { Photo, ProblemStatus, RejectReason } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
 
 interface PublishInput {
@@ -115,19 +115,37 @@ export class ModerationService {
 
   // POST /moderation/problems/:id/photos — добавить фото проблеме (раздел 9.4).
   // kind: 'before' | 'after' — фото «после» обязательно для перехода в «Решено».
-  async addPhotos(problemId: string, kind: 'before' | 'after', files: Array<{ filename: string; size: number }>) {
+  async addPhotos(
+    problemId: string,
+    kind: 'before' | 'after',
+    files: Array<{ buffer: Buffer; mimetype: string; size: number }>,
+  ) {
     const problem = await this.prisma.problem.findUnique({ where: { id: problemId } });
     if (!problem) throw new NotFoundException('Проблема не найдена');
     if (!files?.length) throw new BadRequestException('Нужен хотя бы один файл');
 
     const existing = await this.prisma.photo.count({ where: { problemId } });
-    return this.prisma.$transaction(
-      files.map((f, i) =>
-        this.prisma.photo.create({
-          data: { problemId, kind, path: `/uploads/${f.filename}`, bytes: f.size, sort: existing + i },
-        }),
-      ),
-    );
+    const created: Photo[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i];
+      const photo = await this.prisma.photo.create({
+        data: {
+          problemId,
+          kind,
+          data: f.buffer,
+          mimeType: f.mimetype,
+          bytes: f.size,
+          sort: existing + i,
+          path: '',
+        },
+      });
+      const updated = await this.prisma.photo.update({
+        where: { id: photo.id },
+        data: { path: `/api/v1/photos/${photo.id}/file` },
+      });
+      created.push(updated);
+    }
+    return created;
   }
 
   // POST /moderation/problems/:id/status — сменить статус проблемы (раздел 7.2, 9.4).

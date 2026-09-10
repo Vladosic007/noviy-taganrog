@@ -13,11 +13,17 @@ interface CreateInput {
   consentVersion?: string;
 }
 
+type UploadedFile = {
+  buffer: Buffer;
+  originalname: string;
+  mimetype: string;
+  size: number;
+};
+
 @Injectable()
 export class SubmissionsService {
   constructor(private prisma: PrismaService) {}
 
-  // До VK-авторизации (фаза 5) все заявки привязываем к сервисному пользователю «Гость».
   private guestUser() {
     return this.prisma.user.upsert({
       where: { vkId: 0n },
@@ -26,7 +32,7 @@ export class SubmissionsService {
     });
   }
 
-  async create(input: CreateInput, files: Array<{ filename: string; size: number }>) {
+  async create(input: CreateInput, files: UploadedFile[]) {
     if (!input.description || input.description.trim().length < 10) {
       throw new BadRequestException('Опишите проблему подробнее — минимум 10 символов.');
     }
@@ -42,7 +48,9 @@ export class SubmissionsService {
       ? await this.prisma.category.findUnique({ where: { slug: input.categorySlug } })
       : null;
 
-    return this.prisma.submission.create({
+    // Создаём заявку без фото, потом добавляем фото — так path у Photo сможет ссылаться
+    // на реальный id (path = /api/v1/photos/<id>/file).
+    const submission = await this.prisma.submission.create({
       data: {
         authorId: author.id,
         categoryId: category?.id ?? null,
@@ -55,18 +63,35 @@ export class SubmissionsService {
         isAnonymous: !!input.isAnonymous,
         consentVersion: input.consentVersion ?? 'v1',
         status: 'pending',
-        photos: {
-          create: files.slice(0, 3).map((f, i) => ({
-            // ⚠️ EXIF пока НЕ вычищается (ТЗ 11.3) — обязательно сделать до публичного запуска,
-            // иначе координаты из EXIF (домашний адрес) утекут в публичный доступ.
-            path: `/uploads/${f.filename}`,
-            bytes: f.size,
-            sort: i,
-            uploadedById: author.id,
-          })),
-        },
       },
-      include: { photos: true, category: true },
+    });
+
+    // Кладём бинарник каждого фото прямо в БД (BYTEA).
+    for (let i = 0; i < Math.min(files.length, 3); i++) {
+      const f = files[i];
+      const photo = await this.prisma.photo.create({
+        data: {
+          submissionId: submission.id,
+          data: f.buffer,
+          mimeType: f.mimetype,
+          bytes: f.size,
+          sort: i,
+          uploadedById: author.id,
+          path: '', // временный, обновим ниже
+        },
+      });
+      await this.prisma.photo.update({
+        where: { id: photo.id },
+        data: { path: `/api/v1/photos/${photo.id}/file` },
+      });
+    }
+
+    return this.prisma.submission.findUnique({
+      where: { id: submission.id },
+      include: {
+        category: true,
+        photos: { select: { id: true, path: true, kind: true, sort: true, bytes: true } },
+      },
     });
   }
 
@@ -77,7 +102,7 @@ export class SubmissionsService {
       orderBy: { createdAt: 'desc' },
       include: {
         category: true,
-        photos: true,
+        photos: { select: { id: true, path: true, kind: true, sort: true, bytes: true } },
         problem: { select: { id: true, status: true, title: true } },
       },
     });
