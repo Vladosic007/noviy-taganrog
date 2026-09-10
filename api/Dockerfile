@@ -42,4 +42,4 @@ RUN mkdir -p uploads appeals
 # Порт задаётся Render.com через env PORT. Локально дефолтимся на 3001.
 EXPOSE 3001
 # Перед стартом применяем миграции: schema.prisma → БД.
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
