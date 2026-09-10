@@ -6,16 +6,18 @@ export const APP = {
   tagline: 'Карта городских проблем',
 };
 
-// Абсолютный URL API-хоста — нужен, чтобы клеить пути к фото (/uploads/...).
-// В demo-режиме (Vercel без бэкенда) хост пустой — используем локальные моки.
-export const API_HOST = import.meta.env.VITE_API_HOST ?? 'http://localhost:3001';
+// Абсолютный URL API-хоста. Приоритет:
+//   1) env-переменная VITE_API_HOST (для локальной разработки — переопределит хост)
+//   2) прод-URL нашего API на Render (по умолчанию для деплоя на Vercel)
+// URL публичный — никакого секрета нет, любой посетитель сайта видит его в DevTools.
+const PROD_API_HOST = 'https://noviy-taganrog-api.onrender.com';
+export const API_HOST =
+  (import.meta.env.VITE_API_HOST as string | undefined) ??
+  (import.meta.env.DEV ? 'http://localhost:3001' : PROD_API_HOST);
 
-// Демо-режим: включается, если явно `VITE_DEMO=1` ИЛИ если API-хост не задан
-// (например, деплой на Vercel до подключения Railway/Render). В этом режиме экраны
-// работают на моках `MOCK_PROBLEMS`, форма подачи и модерация показывают понятное
-// «сервер ещё не подключён» вместо ошибок сети.
-export const DEMO_MODE =
-  import.meta.env.VITE_DEMO === '1' || !import.meta.env.VITE_API_HOST;
+// Демо-режим: если явно попросили через VITE_DEMO=1. Иначе API_HOST всегда задан
+// (см. выше), и приложение стучится в реальный бэкенд.
+export const DEMO_MODE = import.meta.env.VITE_DEMO === '1';
 
 export const CITY = {
   name: 'Таганрог',
