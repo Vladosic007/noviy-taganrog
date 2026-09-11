@@ -89,6 +89,35 @@ export function MapScreen() {
       });
       if (problemsRef.current.length) fitToProblems(map, problemsRef.current);
 
+      // Halo под точками — мягкий подсвет, чтобы маркеры были видны на любой подложке
+      // (светлая карта, тёмная тема, зелёные парки Таганрога).
+      map.addLayer({
+        id: 'points-halo',
+        type: 'circle',
+        source: 'problems',
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': [
+            'match',
+            ['get', 'status'],
+            'found', STATUS_META.found.color,
+            'in_progress', STATUS_META.in_progress.color,
+            'resolved', STATUS_META.resolved.color,
+            'declined', STATUS_META.declined.color,
+            STATUS_META.found.color,
+          ],
+          'circle-opacity': 0.25,
+          // Ореол зум-адаптивный: на низком зуме крупный, на высоком меньше — везде заметный.
+          'circle-radius': [
+            'interpolate', ['linear'], ['zoom'],
+            9, 14,
+            12, 18,
+            15, 22,
+            18, 26,
+          ],
+          'circle-blur': 0.4,
+        },
+      });
       map.addLayer({
         id: 'clusters',
         type: 'circle',
@@ -96,8 +125,13 @@ export function MapScreen() {
         filter: ['has', 'point_count'],
         paint: {
           'circle-color': '#0ad1c9',
-          'circle-radius': ['step', ['get', 'point_count'], 16, 5, 22, 15, 28],
-          'circle-opacity': 0.92,
+          // Кластеры: базовый радиус зависит от количества И зума.
+          'circle-radius': [
+            'interpolate', ['linear'], ['zoom'],
+            9, ['step', ['get', 'point_count'], 20, 5, 26, 15, 34],
+            15, ['step', ['get', 'point_count'], 22, 5, 30, 15, 40],
+          ],
+          'circle-opacity': 0.95,
           'circle-stroke-width': 3,
           'circle-stroke-color': '#ffffff',
         },
@@ -110,9 +144,14 @@ export function MapScreen() {
         layout: {
           'text-field': ['get', 'point_count_abbreviated'],
           'text-font': ['Noto Sans Regular'],
-          'text-size': 13,
+          'text-size': 15,
+          'text-allow-overlap': true,
         },
-        paint: { 'text-color': '#063a37' },
+        paint: {
+          'text-color': '#063a37',
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 1.2,
+        },
       });
       map.addLayer({
         id: 'points',
@@ -129,9 +168,17 @@ export function MapScreen() {
             'declined', STATUS_META.declined.color,
             STATUS_META.found.color,
           ],
-          'circle-radius': 9,
-          'circle-stroke-width': ['match', ['get', 'status'], 'found', 3, 2],
-          'circle-stroke-color': ['match', ['get', 'status'], 'found', '#0ad1c9', '#ffffff'],
+          // Радиус адаптируется к зуму — на «весь город» точки крупнее, чтобы были видны.
+          'circle-radius': [
+            'interpolate', ['linear'], ['zoom'],
+            9, 8,
+            12, 10,
+            15, 12,
+            18, 14,
+          ],
+          'circle-stroke-width': 3,
+          'circle-stroke-color': '#ffffff',
+          'circle-opacity': 1,
         },
       });
 
