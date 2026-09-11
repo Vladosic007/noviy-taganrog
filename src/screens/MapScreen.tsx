@@ -89,35 +89,57 @@ export function MapScreen() {
       });
       if (problemsRef.current.length) fitToProblems(map, problemsRef.current);
 
-      // Halo под точками — мягкий подсвет, чтобы маркеры были видны на любой подложке
-      // (светлая карта, тёмная тема, зелёные парки Таганрога).
+      // Общая логика цвета точки от статуса — используем в нескольких слоях.
+      const colorByStatus: maplibregl.DataDrivenPropertyValueSpecification<string> = [
+        'match',
+        ['get', 'status'],
+        'found', STATUS_META.found.color,
+        'in_progress', STATUS_META.in_progress.color,
+        'resolved', STATUS_META.resolved.color,
+        'declined', STATUS_META.declined.color,
+        STATUS_META.found.color,
+      ] as unknown as maplibregl.DataDrivenPropertyValueSpecification<string>;
+
+      // Ореол — большой мягкий подсвет цветом статуса. Виден за километр.
       map.addLayer({
         id: 'points-halo',
         type: 'circle',
         source: 'problems',
         filter: ['!', ['has', 'point_count']],
         paint: {
-          'circle-color': [
-            'match',
-            ['get', 'status'],
-            'found', STATUS_META.found.color,
-            'in_progress', STATUS_META.in_progress.color,
-            'resolved', STATUS_META.resolved.color,
-            'declined', STATUS_META.declined.color,
-            STATUS_META.found.color,
-          ],
-          'circle-opacity': 0.25,
-          // Ореол зум-адаптивный: на низком зуме крупный, на высоком меньше — везде заметный.
+          'circle-color': colorByStatus,
+          'circle-opacity': 0.35,
           'circle-radius': [
             'interpolate', ['linear'], ['zoom'],
-            9, 14,
-            12, 18,
-            15, 22,
-            18, 26,
+            9, 22,
+            12, 26,
+            15, 30,
+            18, 34,
           ],
-          'circle-blur': 0.4,
+          'circle-blur': 0.55,
         },
       });
+
+      // Тонкое тёмное «дно» под точкой — для контраста на светлой подложке.
+      map.addLayer({
+        id: 'points-shadow',
+        type: 'circle',
+        source: 'problems',
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': '#000000',
+          'circle-opacity': 0.22,
+          'circle-radius': [
+            'interpolate', ['linear'], ['zoom'],
+            9, 15,
+            12, 17,
+            15, 19,
+            18, 21,
+          ],
+          'circle-blur': 0.3,
+        },
+      });
+
       map.addLayer({
         id: 'clusters',
         type: 'circle',
@@ -125,14 +147,13 @@ export function MapScreen() {
         filter: ['has', 'point_count'],
         paint: {
           'circle-color': '#0ad1c9',
-          // Кластеры: базовый радиус зависит от количества И зума.
           'circle-radius': [
             'interpolate', ['linear'], ['zoom'],
-            9, ['step', ['get', 'point_count'], 20, 5, 26, 15, 34],
-            15, ['step', ['get', 'point_count'], 22, 5, 30, 15, 40],
+            9, ['step', ['get', 'point_count'], 26, 5, 32, 15, 42],
+            15, ['step', ['get', 'point_count'], 28, 5, 36, 15, 48],
           ],
-          'circle-opacity': 0.95,
-          'circle-stroke-width': 3,
+          'circle-opacity': 0.98,
+          'circle-stroke-width': 4,
           'circle-stroke-color': '#ffffff',
         },
       });
@@ -144,41 +165,55 @@ export function MapScreen() {
         layout: {
           'text-field': ['get', 'point_count_abbreviated'],
           'text-font': ['Noto Sans Regular'],
-          'text-size': 15,
+          'text-size': 16,
           'text-allow-overlap': true,
         },
         paint: {
           'text-color': '#063a37',
           'text-halo-color': '#ffffff',
-          'text-halo-width': 1.2,
+          'text-halo-width': 1.5,
         },
       });
+      // Основная цветная точка — крупная, с толстой белой обводкой.
       map.addLayer({
         id: 'points',
         type: 'circle',
         source: 'problems',
         filter: ['!', ['has', 'point_count']],
         paint: {
-          'circle-color': [
-            'match',
-            ['get', 'status'],
-            'found', STATUS_META.found.color,
-            'in_progress', STATUS_META.in_progress.color,
-            'resolved', STATUS_META.resolved.color,
-            'declined', STATUS_META.declined.color,
-            STATUS_META.found.color,
-          ],
-          // Радиус адаптируется к зуму — на «весь город» точки крупнее, чтобы были видны.
+          'circle-color': colorByStatus,
           'circle-radius': [
             'interpolate', ['linear'], ['zoom'],
-            9, 8,
-            12, 10,
-            15, 12,
-            18, 14,
+            9, 12,
+            12, 14,
+            15, 16,
+            18, 18,
           ],
-          'circle-stroke-width': 3,
+          'circle-stroke-width': [
+            'interpolate', ['linear'], ['zoom'],
+            9, 3.5,
+            15, 4,
+          ],
           'circle-stroke-color': '#ffffff',
           'circle-opacity': 1,
+        },
+      });
+      // Внутреннее ядро — маленькая тёмная точка в центре, придаёт «прицельный» вид пину.
+      map.addLayer({
+        id: 'points-core',
+        type: 'circle',
+        source: 'problems',
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': '#ffffff',
+          'circle-opacity': 0.85,
+          'circle-radius': [
+            'interpolate', ['linear'], ['zoom'],
+            9, 3,
+            12, 3.5,
+            15, 4,
+            18, 5,
+          ],
         },
       });
 
