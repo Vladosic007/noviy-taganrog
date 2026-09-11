@@ -11,6 +11,7 @@ import { Onboarding } from '../components/Onboarding';
 import { AddressSearch } from '../components/AddressSearch';
 import { useFilters, applyFilters, activeFilterCount } from '../store/filters';
 import { useProblems } from '../lib/problems';
+import { wakeUpServer } from '../lib/api';
 import './MapScreen.css';
 
 // Временная растровая подложка OSM. На фазе 4 заменяется своим PMTiles + фирменным
@@ -37,6 +38,12 @@ export function MapScreen() {
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const filters = useFilters();
+
+  // Разбудить сервер Render Free tier сразу, пока пользователь ходит по карте —
+  // к моменту отправки формы (~30-60 сек позже) сервер уже проснётся.
+  useEffect(() => {
+    wakeUpServer();
+  }, []);
 
   // Данные из API. Держим в ref, чтобы обработчики карты (созданные один раз) видели
   // актуальный набор проблем.

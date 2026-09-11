@@ -1,12 +1,40 @@
 import type { ProblemStatus } from './statuses';
+import { API_HOST } from './config';
 
 // Единая точка общения фронта с бэкендом (NestJS, префикс /api/v1).
-const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:3001/api/v1';
+// API_HOST приходит из config.ts — там правильный прод-URL с Render.
+const API_BASE = `${API_HOST}/api/v1`;
+
+// Render Free tier засыпает через 15 мин без запросов. Первое обращение
+// после сна ждёт ~30-60 сек пока контейнер стартует. Даём длинный таймаут
+// и человекочитаемую ошибку, если сервер не поднялся.
+const COLD_START_TIMEOUT = 60_000;
+
+async function fetchWithTimeout(url: string, init?: RequestInit, timeoutMs = COLD_START_TIMEOUT): Promise<Response> {
+  const ctrl = new AbortController();
+  const timer = window.setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: init?.signal ?? ctrl.signal });
+  } catch (e) {
+    if (e instanceof Error && (e.name === 'AbortError' || e.message === 'Failed to fetch')) {
+      throw new Error('Сервер сейчас просыпается — подождите 30 секунд и попробуйте ещё раз.');
+    }
+    throw e;
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`);
+  const res = await fetchWithTimeout(`${API_BASE}${path}`);
   if (!res.ok) throw new Error(`API ${res.status} на ${path}`);
   return res.json() as Promise<T>;
+}
+
+// Пингуем сервер — просто чтобы разбудить его на Render Free tier.
+// Без ожидания результата: если упадёт — не мешаем UI.
+export function wakeUpServer(): void {
+  fetchWithTimeout(`${API_BASE}/moderation/count`, undefined, 5_000).catch(() => {});
 }
 
 export interface ApiCategory {
@@ -109,7 +137,7 @@ export const api = {
   },
   toggleLike: (id: string) => postJson<{ liked: boolean; likesCount: number }>(`/problems/${id}/like`, {}),
   createSubmission: async (fd: FormData): Promise<ApiSubmission> => {
-    const res = await fetch(`${API_BASE}/submissions`, { method: 'POST', body: fd });
+    const res = await fetchWithTimeout(`${API_BASE}/submissions`, { method: 'POST', body: fd });
     if (!res.ok) {
       const err = await res.json().catch(() => null);
       throw new Error(err?.message || `Не удалось отправить заявку (${res.status})`);
@@ -139,7 +167,7 @@ export const api = {
       body,
     ),
   revokeSignature: async (id: string) => {
-    const res = await fetch(`${API_BASE}/problems/${id}/signature`, { method: 'DELETE' });
+    const res = await fetchWithTimeout(`${API_BASE}/problems/${id}/signature`, { method: 'DELETE' });
     if (!res.ok) throw new Error(`DELETE signature → ${res.status}`);
     return res.json() as Promise<{ signed: boolean; subscribed: boolean; signaturesCount: number }>;
   },
@@ -191,7 +219,7 @@ export const api = {
   addProblemPhotos: async (id: string, kind: 'before' | 'after', files: File[]): Promise<ApiPhoto[]> => {
     const fd = new FormData();
     files.forEach((f) => fd.append('photos', f));
-    const res = await fetch(`${API_BASE}/moderation/problems/${id}/photos?kind=${kind}`, { method: 'POST', body: fd });
+    const res = await fetchWithTimeout(`${API_BASE}/moderation/problems/${id}/photos?kind=${kind}`, { method: 'POST', body: fd });
     if (!res.ok) {
       const err = await res.json().catch(() => null);
       throw new Error(err?.message || `POST photos → ${res.status}`);
@@ -201,7 +229,7 @@ export const api = {
 };
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetchWithTimeout(`${API_BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
